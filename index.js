@@ -10,7 +10,7 @@ app.use(express.json())
 
 
 
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const uri = "mongodb+srv://dipthobracu02:RjvZC5tIDKECUFcn@cluster0.ro8ugkx.mongodb.net/?retryWrites=true&w=majority";
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -27,10 +27,71 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
 
     let classCollection = client.db('CSE470').collection('classes');
-
+    let userCollection = client.db('CSE470').collection('users');
+    let bookedClassCollection =  client.db('CSE470').collection('bookedClasses');
     app.get('/classes', async (req, res)=>{
       let result = await classCollection.find().toArray();
       res.send(result);
+    })
+
+    app.post('/users', async (req, res)=>{
+      let user = req.body;
+      let query = {email : user.email};
+      let oldUser = await userCollection.findOne(query);
+      if(oldUser){
+        return
+      }
+      let result = await userCollection.insertOne(user);
+      res.send(result);
+      
+    })
+
+    app.get('/isAdmin/:email', async (req, res)=>{
+      let mail = req.params.email;
+      let filter = {email : mail}
+      let user = await userCollection.findOne(filter);
+      let result = { isAdmin : user?.role == 'admin'}
+      res.send(result);
+    })
+
+    app.get('/isInstructor/:email', async (req, res)=>{
+      let mail = req.params.email;
+      let filter = {email : mail}
+      let user = await userCollection.findOne(filter);
+      let result = { isInstructor : user?.role == 'instructor'}
+      res.send(result);
+    })
+
+    app.get('/classes/approved',  async (req, res)=>{
+      let filter ={ status : 'approved'}
+      let result = await classCollection.find(filter).toArray()
+
+      res.send(result)
+    })
+
+    app.post('/addClass', async(req, res)=>{
+      let getClass = req.body;
+      let result = await bookedClassCollection.insertOne(getClass)
+      res.send(result)
+    })
+
+    app.get('/bookedClasses',  async(req, res)=>{
+      let mail = req.query.email
+      let filter = {email : mail}
+      let result = await bookedClassCollection.find(filter).toArray();
+      res.send(result)
+    })
+
+    app.delete('/bookedClasses/:id', async(req, res)=>{
+    
+      let id = req.params.id
+      // let mail = req.query.email
+     
+      console.log(id);
+      let filter = { _id : new ObjectId(id)}
+      
+       let result = await bookedClassCollection.deleteOne(filter);
+       res.send(result)
     })
 
 
