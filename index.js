@@ -87,11 +87,114 @@ async function run() {
       let id = req.params.id
       // let mail = req.query.email
      
-      console.log(id);
+      // console.log(id);
       let filter = { _id : new ObjectId(id)}
       
        let result = await bookedClassCollection.deleteOne(filter);
        res.send(result)
+    })
+
+    app.get('/users',  async (req, res)=>{
+      let result = await userCollection.find().toArray();
+      res.send(result)
+    })
+
+    app.put('/users/a/:id', async (req, res)=>{
+      let id = req.params.id;
+      // console.log(id);
+      let filter = { _id : new ObjectId(id)};
+      let updateRole = {
+        $set: {
+          role : 'admin'
+        }
+      }
+      let result = await userCollection.updateOne(filter, updateRole);
+      res.send(result);
+
+    })
+    app.put('/users/s/:id',  async (req, res)=>{
+      let id = req.params.id;
+      // console.log(id);
+      let filter = { _id : new ObjectId(id)};
+      let updateRole = {
+        $set: {
+          role : 'student'
+        }
+      }
+      let result = await userCollection.updateOne(filter, updateRole);
+      res.send(result);
+
+    })
+    app.put('/users/i/:id', async (req, res)=>{
+      let id = req.params.id;
+      // console.log(id);
+      let filter = { _id : new ObjectId(id)};
+      let updateRole = {
+        $set: {
+          role : 'instructor'
+        }
+      }
+      let result = await userCollection.updateOne(filter, updateRole);
+      res.send(result);
+
+    })
+
+    
+    app.post('/classes', async (req, res)=>{
+      let newClass = req.body;
+      let result = await classCollection.insertOne(newClass)
+
+      res.send(result)
+
+    })
+
+    app.put('/classes/approve/:id',  async(req, res)=>{
+      let id = req.params.id;
+      let filter = {_id : new ObjectId(id)}
+      // let getClass = await classCollection.findOne(filter);
+      let updateStatus = {
+        $set : {
+          status : 'approved'
+        }
+      }
+      let result = await classCollection.updateOne(filter,updateStatus)
+      res.send(result)
+    })
+    
+    app.put('/classes/deny/:id',  async(req, res)=>{
+      let id = req.params.id;
+      let filter = {_id : new ObjectId(id)}
+      // let getClass = await classCollection.findOne(filter);
+      let updateStatus = {
+        $set : {
+          status : 'denied'
+        }
+      }
+      let result = await classCollection.updateOne(filter,updateStatus)
+      res.send(result)
+    })
+    
+    app.put('/classes/feedback/:id',  async(req, res)=>{
+      let id = req.params.id;
+      let feedback = req.body;
+      let filter = {_id : new ObjectId(id)}
+      // let getClass = await classCollection.findOne(filter);
+      let updateStatus = {
+        $set : {
+          feedback : feedback.feedback
+        }
+      }
+      let result = await classCollection.updateOne(filter,updateStatus)
+      res.send(result)
+    })
+
+    app.get('/instructorClass',  async(req, res)=>{
+      let mail = req.query.email
+      // console.log(mail);
+      let filter = {email : mail};
+      let result = await classCollection.find(filter).toArray();
+      res.send(result)
+
     })
 
 
